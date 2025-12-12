@@ -1,0 +1,19 @@
+[package]
+name = "client"
+version = "1.0.0"
+authors = []
+
+[addresses]
+client_addr = "0x0a"
+
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-framework"
+
+[dependencies.supra_vrf]
+local = "../supra_vrf"
+
+[dev-dependencies]
