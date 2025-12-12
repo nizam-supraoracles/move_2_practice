@@ -26,7 +26,7 @@ module supra_addr::supra_vrf {
     // Stores the client's callback function so the admin can call it later.
     // The function signature accepts (nonce, random_number).
     struct StoreClientFun has key, drop {
-        callback_function: |u64, u256| bool has store + copy + drop
+        callback_function: |&signer, u64, u256| has store + copy + drop
     }
 
     // Initialize module state. Should be called by module deployer/admin to create VRFConfig.
@@ -39,7 +39,7 @@ module supra_addr::supra_vrf {
     // - callback_function: function pointer on the client module to invoke when result is ready
     // Returns the request nonce assigned to this request.
     // Acquires VRFConfig to increment and persist the nonce.
-    public fun rng_request(caller: &signer, callback_function: |u64, u256| bool has store + copy + drop ): u64 acquires VRFConfig {
+    public fun rng_request(caller: &signer, callback_function: |&signer, u64, u256| has store + copy + drop ): u64 acquires VRFConfig {
         let vrf_config = borrow_global_mut<VRFConfig>(@supra_addr);
         vrf_config.request_nonce += 1;
 
@@ -77,7 +77,7 @@ module supra_addr::supra_vrf {
         // let random_number = 10;
 
         // Call the client's callback function with (nonce, random_number).
-        (data.callback_function)(nonce, random_number);
+        (data.callback_function)(admin, nonce, random_number);
     }
 
     #[test_only]

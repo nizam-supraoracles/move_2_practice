@@ -10,6 +10,9 @@ module client_addr::client {
     /// Unauthorized caller error: only the module owner/address may call certain functions.
     const E_UNAUTHORISED_CALLER: u64 = 1;
 
+    /// Unauthorized caller error: only the supra vrf admin call call this.
+    const E_CALLER_IS_NOT_SUPRA: u64 = 1;
+
     /// Invalid nonce error: callback provided a nonce that was not requested/stored.
     const E_INVALID_NONCE: u64 = 2;
 
@@ -32,7 +35,8 @@ module client_addr::client {
         assert!(signer::address_of(client) == @client_addr, E_UNAUTHORISED_CALLER);
 
         // Construct a function pointer to the local callback implementation.
-        let callback_function: |u64, u256| bool has store + copy + drop = |nonce, random_number| callback_function(nonce, random_number);
+        let callback_function: |&signer, u64, u256| has store + copy + drop = 
+            |caller, nonce, random_number| callback_function(caller, nonce, random_number);
 
         // Make RNG request to supra_vrf; this will emit an event and persist the callback on the client's address.
         let request_nonce = supra_vrf::rng_request(client, callback_function);
@@ -45,13 +49,13 @@ module client_addr::client {
 
     // Persistent callback that supra_vrf will call with (nonce, random_number).
     // - Validates the nonce exists and then upserts the random value into storage.
-    #[persistent] public fun callback_function(nonce: u64, random_number: u256): bool acquires RandomNumber {
+    #[persistent] public fun callback_function(sender: &signer, nonce: u64, random_number: u256) acquires RandomNumber {
+
+        assert!(signer::address_of(sender) == @supra_addr, E_CALLER_IS_NOT_SUPRA);
+
         let fetch_list = borrow_global_mut<RandomNumber>(@client_addr);
         assert!(fetch_list.list.contains(nonce), E_INVALID_NONCE);
         fetch_list.list.upsert(nonce, random_number);
-
-        // TODO : needs to remove reponse argument later
-        true
     }
 
     #[view]
