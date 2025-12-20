@@ -4,7 +4,7 @@ version = "1.0.0"
 authors = []
 
 [addresses]
-supra_addr = "0x0b"
+supra_addr = "9c3b6a66be7d683d55e455f0a16b26b4964267b6931b9d062f8dfd3c75e00243"
 
 [dev-addresses]
 

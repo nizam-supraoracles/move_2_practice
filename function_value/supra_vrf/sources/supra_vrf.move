@@ -57,13 +57,13 @@ module supra_addr::supra_vrf {
         nonce
     }
 
-    #[lint::allow_unsafe_randomness]
+    #[randomness]
     // Admin function to generate (or supply) randomness and invoke the stored client callback.
     // - admin: signer authorized to call this
     // - client_addr: address where the callback was stored (from the event)
     // - nonce: request id to correlate the response
     // Acquires StoreClientFun so it can read the stored callback function.
-    public entry fun generate_rng_and_callback(admin: &signer, client_addr: address, nonce: u64) acquires StoreClientFun {
+    entry fun generate_rng_and_callback(admin: &signer, client_addr: address, nonce: u64) acquires StoreClientFun {
 
         assert!(signer::address_of(admin) == @supra_addr, E_UNAUTHORISED_CALLER);
 
@@ -84,6 +84,11 @@ module supra_addr::supra_vrf {
     public fun init_module_test(admin: &signer) {
         assert!(signer::address_of(admin) == @supra_addr, E_UNAUTHORISED_CALLER);
         init_module(admin);
+    }
+
+    #[test_only]
+    public fun generate_rng_and_callback_test(admin: &signer, client_addr: address, nonce: u64) {
+        generate_rng_and_callback(admin, client_addr, nonce)
     }
     
 }

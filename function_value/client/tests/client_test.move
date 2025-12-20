@@ -21,7 +21,7 @@ module client_addr::client_test {
 
         let client_addr = signer::address_of(client);
         // now admin is calling is processing the rng and making callback transaction
-        supra_vrf::generate_rng_and_callback(supra_admin, client_addr, 1);
+        supra_vrf::generate_rng_and_callback_test(supra_admin, client_addr, 1);
 
         // now client is feching the random number which is supra is given
         let random_number = client::get_nonce(1);

@@ -4,7 +4,7 @@ version = "1.0.0"
 authors = []
 
 [addresses]
-client_addr = "0x0a"
+client_addr = "0cee70c14e7edb1035f8b393ecc1e41954e87354ffa0765b5710cda3af418b84"
 
 [dev-addresses]
 
