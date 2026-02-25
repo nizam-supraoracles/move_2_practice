@@ -6,6 +6,7 @@ module client_addr::client {
     use aptos_std::smart_table;
     use aptos_std::signer;
     use supra_addr::supra_vrf;
+    use aptos_framework::event;
 
     /// Unauthorized caller error: only the module owner/address may call certain functions.
     const E_UNAUTHORISED_CALLER: u64 = 1;
@@ -22,6 +23,14 @@ module client_addr::client {
         list: smart_table::SmartTable<u64, u256>
     }
 
+    #[event]
+    struct CallbackEvent has drop, store {
+        nonce: u64,
+        random_number: u256,
+        seed: u64,
+        auxiliary: u64,
+    }
+
     // Initialize the client's storage (to be called during contract deployment).
     fun init_module(client: &signer) {
         move_to(client, RandomNumber { list: smart_table::new() })
@@ -36,7 +45,7 @@ module client_addr::client {
 
         // Construct a function pointer to the local callback implementation.
         let callback_function: |&signer, u64, u256| has store + copy + drop = 
-            |caller, nonce, random_number| callback_function(caller, nonce, random_number, seed, auxiliary);
+            |caller, nonce, random_number| callback_function(caller, nonce, seed, random_number, auxiliary);
 
         // Make RNG request to supra_vrf; this will emit an event and persist the callback on the client's address.
         let request_nonce = supra_vrf::rng_request(client, callback_function);
@@ -51,7 +60,7 @@ module client_addr::client {
     // - Validates the nonce exists and then upserts the random value into storage.
     // experiment , 5 arguments (4, 5 is frozan)
     // second expirement => 1, 2 , 4 => 3 & 5 is frozan 
-    #[persistent] public fun callback_function(sender: &signer, nonce: u64, random_number: u256, seed: u64, auxiliary: u64) acquires RandomNumber {
+    #[persistent] public fun callback_function(sender: &signer, nonce: u64, seed: u64, random_number: u256, auxiliary: u64) acquires RandomNumber {
 
         std::debug::print(&seed);
         std::debug::print(&auxiliary);
@@ -65,6 +74,8 @@ module client_addr::client {
         let fetch_list = borrow_global_mut<RandomNumber>(@client_addr);
         assert!(fetch_list.list.contains(nonce), E_INVALID_NONCE);
         fetch_list.list.upsert(nonce, random_number);
+
+        event::emit(CallbackEvent { nonce, random_number, seed, auxiliary });
     }
 
     #[view]
