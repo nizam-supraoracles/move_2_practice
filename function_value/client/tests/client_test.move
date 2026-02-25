@@ -14,7 +14,7 @@ module client_addr::client_test {
         client::init_module_test(client);
         supra_vrf::init_module_test(supra_admin);
 
-        client::request_nonce(client);
+        client::request_nonce(client, 10, 100);
 
         // initally we just requested random number so nonce is 1 and rng =0
         assert!(client::get_nonce(1) == 0, 0x101);

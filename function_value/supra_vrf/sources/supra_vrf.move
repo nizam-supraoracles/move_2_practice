@@ -40,6 +40,10 @@ module supra_addr::supra_vrf {
     // Returns the request nonce assigned to this request.
     // Acquires VRFConfig to increment and persist the nonce.
     public fun rng_request(caller: &signer, callback_function: |&signer, u64, u256| has store + copy + drop ): u64 acquires VRFConfig {
+
+        // debug log to verify the function pointer is correctly passed
+        std::debug::print(&callback_function);
+
         let vrf_config = borrow_global_mut<VRFConfig>(@supra_addr);
         vrf_config.request_nonce += 1;
 

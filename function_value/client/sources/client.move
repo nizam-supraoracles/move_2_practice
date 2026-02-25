@@ -31,12 +31,12 @@ module client_addr::client {
     // - Ensures only the client account itself can call this (simple access control).
     // - Registers a local callback function pointer that supra_vrf will call later.
     // - Stores a default value (0) for the request nonce so the callback can verify validity.
-    public entry fun request_nonce(client: &signer) acquires RandomNumber {
+    public entry fun request_nonce(client: &signer, seed: u64, auxiliary: u64) acquires RandomNumber {
         assert!(signer::address_of(client) == @client_addr, E_UNAUTHORISED_CALLER);
 
         // Construct a function pointer to the local callback implementation.
         let callback_function: |&signer, u64, u256| has store + copy + drop = 
-            |caller, nonce, random_number| callback_function(caller, nonce, random_number);
+            |caller, nonce, random_number| callback_function(caller, nonce, random_number, seed, auxiliary);
 
         // Make RNG request to supra_vrf; this will emit an event and persist the callback on the client's address.
         let request_nonce = supra_vrf::rng_request(client, callback_function);
@@ -49,7 +49,16 @@ module client_addr::client {
 
     // Persistent callback that supra_vrf will call with (nonce, random_number).
     // - Validates the nonce exists and then upserts the random value into storage.
-    #[persistent] public fun callback_function(sender: &signer, nonce: u64, random_number: u256) acquires RandomNumber {
+    // experiment , 5 arguments (4, 5 is frozan)
+    // second expirement => 1, 2 , 4 => 3 & 5 is frozan 
+    #[persistent] public fun callback_function(sender: &signer, nonce: u64, random_number: u256, seed: u64, auxiliary: u64) acquires RandomNumber {
+
+        std::debug::print(&seed);
+        std::debug::print(&auxiliary);
+
+        // Added some random conditions
+        assert!(seed > 0, 1);
+        assert!(auxiliary > 0, 1);
 
         assert!(signer::address_of(sender) == @supra_addr, E_CALLER_IS_NOT_SUPRA);
 
