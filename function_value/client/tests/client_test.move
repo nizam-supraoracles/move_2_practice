@@ -1,3 +1,4 @@
+#[test_only]
 module client_addr::client_test {
     use aptos_std::signer;
     use aptos_framework::randomness;
