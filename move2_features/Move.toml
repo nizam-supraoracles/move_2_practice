@@ -1,0 +1,16 @@
+[package]
+name = "move2_features"
+version = "1.0.0"
+authors = []
+
+[addresses]
+move2_addr = "6835b39c3a29f849e83bf3bb2039746b807a860e1fb6f4a0a77b488dc56c8662"
+
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-framework"
+
+[dev-dependencies]
